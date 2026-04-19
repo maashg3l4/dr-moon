@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { auth, firestore } from '../firebaseConfig'
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth'
 import { collection, getDocs, query, where } from 'firebase/firestore'
@@ -121,6 +121,13 @@ export default function AdminLogin() {
           {loading ? 'Signing in...' : 'Login as Admin'}
         </button>
       </form>
+
+      <p className="mt-5 text-sm text-slate-600">
+        Don't have an account?{' '}
+        <Link to="/admin/signup" className="font-semibold text-purple-700 hover:underline">
+          Create admin account
+        </Link>
+      </p>
 
       <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
         <p className="font-semibold text-slate-900">Admin setup note:</p>

@@ -6,8 +6,10 @@ import AppointmentWizard from './pages/AppointmentWizard'
 import SerialPanel from './pages/SerialPanel'
 import DoctorDashboard from './pages/DoctorDashboard'
 import DoctorLogin from './pages/DoctorLogin'
+import DoctorSignup from './pages/DoctorSignup'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminLogin from './pages/AdminLogin'
+import AdminSignup from './pages/AdminSignup'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
 import LanguageSwitcher from './components/LanguageSwitcher'
@@ -76,7 +78,9 @@ function App() {
           <Route path="/appointment" element={<AppointmentWizard />} />
           <Route path="/serial" element={<SerialPanel />} />
           <Route path="/doctor/login" element={<DoctorLogin />} />
+          <Route path="/doctor/signup" element={<DoctorSignup />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/signup" element={<AdminSignup />} />
           <Route
             path="/doctor"
             element={
