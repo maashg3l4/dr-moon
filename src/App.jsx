@@ -1,4 +1,5 @@
 import { Link, Routes, Route } from 'react-router-dom'
+import { useState } from 'react'
 import { useAppStore } from './store/useAppStore'
 import Home from './pages/Home'
 import AppointmentWizard from './pages/AppointmentWizard'
@@ -10,25 +11,36 @@ import AdminLogin from './pages/AdminLogin'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
 import LanguageSwitcher from './components/LanguageSwitcher'
+import Sidebar from './components/Sidebar'
+import { MdMenu } from 'react-icons/md'
 import { t } from './i18n'
 
 function App() {
   const language = useAppStore(state => state.language)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 antialiased">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.25em] text-emerald-700">
-              ডা. তাসদিকুল ইসলাম মুন
-            </p>
-            <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
-              {t(language, 'appTitle')}
-            </h1>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-md text-slate-400 hover:text-slate-600"
+            >
+              <MdMenu size={20} />
+            </button>
+            <div>
+              <p className="text-sm font-medium uppercase tracking-[0.25em] text-emerald-700">
+                ডা. তাসদিকুল ইসলাম মুন
+              </p>
+              <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                {t(language, 'appTitle')}
+              </h1>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <nav className="flex flex-wrap gap-2">
+            <nav className="hidden lg:flex flex-wrap gap-2">
               <Link to="/" className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
                 Home
               </Link>
@@ -55,6 +67,8 @@ function App() {
           </div>
         </div>
       </header>
+
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <Routes>
