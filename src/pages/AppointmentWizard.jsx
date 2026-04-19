@@ -4,6 +4,8 @@ import { useAppStore } from '../store/useAppStore'
 import { TextToSpeechButton } from '../components/TextToSpeechButton'
 import { PaymentSystem } from '../components/PaymentSystem'
 import { t } from '../i18n'
+import { saveAppointment } from '../services/appointmentNotifications'
+import { useAppointmentNotifications, formatDateBN } from '../hooks/useAppointmentNotifications'
 
 const ageGroups = ['০-৫', '৬-১২', '১৩-১৮', '১৯-৩৫', '৩৬-৫০', '৫০+']
 const timeSlots = ['সন্ধ্যা ৭-৮টা', '৮-৯টা', '৯-১০টা']
@@ -26,6 +28,7 @@ const initialForm = {
   screenshotFile: null,
   screenshotURL: '',
   timeSlot: '',
+  appointmentDate: '',
 }
 
 export default function AppointmentWizard() {
@@ -37,6 +40,9 @@ export default function AppointmentWizard() {
   const [screenshotPreview, setScreenshotPreview] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState('')
+
+  // Enable appointment notifications
+  useAppointmentNotifications()
 
   useEffect(() => {
     if (form.screenshotFile) {
@@ -112,6 +118,7 @@ export default function AppointmentWizard() {
 
     if (currentStep === 3) {
       if (!form.timeSlot) nextErrors.timeSlot = 'required'
+      if (!form.appointmentDate) nextErrors.appointmentDate = 'required'
     }
 
     setErrors(nextErrors)
@@ -141,13 +148,27 @@ export default function AppointmentWizard() {
     setMessage('')
 
     try {
-      const screenshotURL = form.screenshotFile ? `data:image/png;base64,${Math.random()}` : ''
-
       const serialNumber = Math.floor(Math.random() * 100) + 1
 
+      const appointmentData = {
+        name: form.name,
+        phone: form.phone,
+        ageGroup: form.ageGroup,
+        problemType: form.problemType,
+        paymentMethod: form.paymentMethod,
+        transactionId: form.transactionId,
+        timeSlot: form.timeSlot,
+        appointmentDate: form.appointmentDate,
+        serialNumber,
+      }
+
+      // Save to Firebase and schedule notifications
+      await saveAppointment(appointmentData)
+
+      // Also save to localStorage for backward compatibility
       localStorage.setItem(
         `drmoon-serial-${form.phone}`,
-        JSON.stringify({ ...form, serialNumber, paymentScreenshotURL: screenshotURL }),
+        JSON.stringify(appointmentData),
       )
 
       setMessage(`${t(language, 'appointmentSaved')} ${t(language, 'smsSent')}`)
@@ -284,6 +305,27 @@ export default function AppointmentWizard() {
       {step === 3 && (
         <div className="grid gap-6 rounded-[2rem] bg-white p-6 shadow-lg shadow-slate-200/40">
           <div>
+            <label className="label-text" htmlFor="appointmentDate">
+              অ্যাপয়েন্টমেন্ট তারিখ
+            </label>
+            <input
+              id="appointmentDate"
+              name="appointmentDate"
+              type="date"
+              value={form.appointmentDate}
+              onChange={handleInputChange}
+              className="input-field"
+              min={new Date().toISOString().split('T')[0]}
+            />
+            {form.appointmentDate && (
+              <p className="mt-2 text-sm text-emerald-600">
+                নির্বাচিত তারিখ: {formatDateBN(form.appointmentDate)}
+              </p>
+            )}
+            {errors.appointmentDate && <p className="mt-2 text-sm text-rose-600">তারিখ নির্বাচন করুন।</p>}
+          </div>
+
+          <div>
             <p className="label-text">{t(language, 'timeSlot')}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               {timeSlots.map(slot => (
@@ -295,8 +337,10 @@ export default function AppointmentWizard() {
             </div>
             {errors.timeSlot && <p className="mt-2 text-sm text-rose-600">স্লট নির্বাচন করুন।</p>}
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm text-slate-700">সাবমিট করার পর আপনার সিরিয়াল নম্বর স্বয়ংক্রিয়ভাবে তৈরি হবে এবং ফোনে এসএমএস পাঠানো হবে।</p>
+
+          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+            <p className="text-sm text-emerald-900">✓ অ্যাপয়েন্টমেন্টের দিন আপনি এসএমএস রিমাইন্ডার পাবেন।</p>
+            <p className="mt-2 text-sm text-slate-700">সাবমিট করার পর আপনার সিরিয়াল নম্বর স্বয়ংক্রিয়ভাবে তৈরি হবে এবং ফোনে এসএমএস পাঠানো হবে।</p>
           </div>
         </div>
       )}
