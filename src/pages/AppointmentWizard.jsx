@@ -18,6 +18,36 @@ const problemTypes = [
   { value: 'অন্যান্য', label: 'অন্যান্য' },
 ]
 
+// Inside AppointmentWizard.jsx
+const handlePayment = async () => {
+    setLoading(true);
+    try {
+        const response = await fetch('/api/create-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                appointmentId: currentAppointmentId,
+                amount: fee,
+                patientName: formData.name,
+                patientEmail: formData.email,
+                patientPhone: formData.phone
+            }),
+        });
+
+        const result = await response.json();
+        if (result.url) {
+            window.location.replace(result.url); // Redirect to SSLCommerz
+        } else {
+            toast.error("Payment initiation failed.");
+        }
+    } catch (error) {
+        console.error(error);
+        toast.error("An error occurred.");
+    } finally {
+        setLoading(false);
+    }
+};
+
 const initialForm = {
   name: '',
   phone: '',
